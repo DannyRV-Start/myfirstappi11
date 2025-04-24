@@ -39,14 +39,14 @@ public class LocationService {
         return new ArrayList<>(ubications);
     }
 
-    // Filtra por código de departamento (campo 0)
+    // Filtra por código de departamento 
     public List<String> getUbicationsByDepartmentCode(String code) {
         return ubications.stream()
                 .filter(line -> !line.startsWith("Código Departamento") && line.split(",")[0].equalsIgnoreCase(code))
                 .collect(Collectors.toList());
     }
 
-    // Filtra por nombre de municipio (campo 3)
+    // Filtra por nombre de municipio 
     public List<String> getUbicationsByName(String name) {
         return ubications.stream()
                 .filter(line -> {
@@ -57,7 +57,7 @@ public class LocationService {
                 .collect(Collectors.toList());
     }
 
-    // Filtra municipios que inician con letters (campo 3)
+    // Filtra municipios que inician con letters 
     public List<String> getUbicationsByInitialLetters(String letters) {
         return ubications.stream()
                 .filter(line -> {
@@ -68,7 +68,7 @@ public class LocationService {
                 .collect(Collectors.toList());
     }
 
-    // Filtra por nombre de departamento (campo 1)
+    // Filtra por nombre de departamento 
     public List<String> getUbicationsByState(String stateName) {
         return ubications.stream()
                 .filter(line -> {
@@ -79,14 +79,14 @@ public class LocationService {
                 .collect(Collectors.toList());
     }
 
-    // Busca un registro por código de municipio (campo 2)
+    // Busca un registro por código de municipio 
     public String getUbicationByMunicipalityCode(String mCode) {
         return ubications.stream()
                 .filter(line -> !line.startsWith("Código Departamento") && line.split(",")[2].equalsIgnoreCase(mCode))
                 .findFirst().orElse(null);
     }
 
-    // Lista única de departamentos ("code,name")
+    // Lista única de departamentos 
     public List<String> getStates() {
         return ubications.stream()
                 .filter(line -> !line.startsWith("Código Departamento"))
