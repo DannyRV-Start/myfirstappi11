@@ -1,4 +1,3 @@
-// LocationService.java
 package co.edu.umanizales.myfirstapi.Service;
 
 import org.springframework.core.io.ClassPathResource;
