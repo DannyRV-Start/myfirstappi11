@@ -59,4 +59,9 @@ public class LocationController {
     public List<String> getCapitals() {
         return locationService.getCapitals();
     }
+
+    @GetMapping("/by-description-size/{tipo}")
+    public List<String> getByDescriptionSize(@PathVariable String tipo) {
+        return locationService.getUbicationsByDescriptionSize(tipo);
+    }
 }
