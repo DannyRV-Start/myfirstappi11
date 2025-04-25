@@ -1,3 +1,4 @@
+// LocationService.java
 package co.edu.umanizales.myfirstapi.Service;
 
 import org.springframework.core.io.ClassPathResource;
@@ -7,9 +8,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class LocationService {
@@ -26,6 +26,7 @@ public class LocationService {
                         new ClassPathResource("DIVIPOLA-_C_digos_municipios_20250423.csv").getInputStream(),
                         StandardCharsets.UTF_8))) {
             String line;
+            // Cargar todas las líneas incluyendo encabezado
             while ((line = reader.readLine()) != null) {
                 ubications.add(line);
             }
@@ -34,101 +35,86 @@ public class LocationService {
         }
     }
 
+    // Todos los registros
     public List<String> getUbicationsFromFile() {
         return new ArrayList<>(ubications);
     }
 
+    // Filtra por código de departamento (campo 0)
     public List<String> getUbicationsByDepartmentCode(String code) {
-        List<String> result = new ArrayList<>();
-        for (String line : ubications) {
-            if (line.startsWith("Código Departamento")) continue;
-            String[] parts = line.split(",");
-            if (parts[0].equalsIgnoreCase(code)) {
-                result.add(line);
-            }
-        }
-        return result;
+        return ubications.stream()
+                .filter(line -> !line.startsWith("Código Departamento") && line.split(",")[0].equalsIgnoreCase(code))
+                .collect(Collectors.toList());
     }
 
+    // Filtra por nombre de municipio (campo 3)
     public List<String> getUbicationsByName(String name) {
-        List<String> result = new ArrayList<>();
-        for (String line : ubications) {
-            if (line.startsWith("Código Departamento")) continue;
-            String[] parts = line.split(",");
-            if (parts.length > 3 && parts[3].equalsIgnoreCase(name)) {
-                result.add(line);
-            }
-        }
-        return result;
+        return ubications.stream()
+                .filter(line -> {
+                    if (line.startsWith("Código Departamento")) return false;
+                    String[] parts = line.split(",");
+                    return parts[3].equalsIgnoreCase(name);
+                })
+                .collect(Collectors.toList());
     }
 
+    // Filtra municipios que inician con letters (campo 3)
     public List<String> getUbicationsByInitialLetters(String letters) {
-        List<String> result = new ArrayList<>();
-        for (String line : ubications) {
-            if (line.startsWith("Código Departamento")) continue;
-            String[] parts = line.split(",");
-            if (parts.length > 3 && parts[3].toLowerCase().startsWith(letters.toLowerCase())) {
-                result.add(line);
-            }
-        }
-        return result;
+        return ubications.stream()
+                .filter(line -> {
+                    if (line.startsWith("Código Departamento")) return false;
+                    String[] parts = line.split(",");
+                    return parts[3].toLowerCase().startsWith(letters.toLowerCase());
+                })
+                .collect(Collectors.toList());
     }
 
+    // Filtra por nombre de departamento (campo 1)
     public List<String> getUbicationsByState(String stateName) {
-        List<String> result = new ArrayList<>();
-        for (String line : ubications) {
-            if (line.startsWith("Código Departamento")) continue;
-            String[] parts = line.split(",");
-            if (parts.length > 1 && parts[1].equalsIgnoreCase(stateName)) {
-                result.add(line);
-            }
-        }
-        return result;
+        return ubications.stream()
+                .filter(line -> {
+                    if (line.startsWith("Código Departamento")) return false;
+                    String[] parts = line.split(",");
+                    return parts[1].equalsIgnoreCase(stateName);
+                })
+                .collect(Collectors.toList());
     }
 
+    // Busca un registro por código de municipio (campo 2)
     public String getUbicationByMunicipalityCode(String mCode) {
-        for (String line : ubications) {
-            if (line.startsWith("Código Departamento")) continue;
-            String[] parts = line.split(",");
-            if (parts.length > 2 && parts[2].equalsIgnoreCase(mCode)) {
-                return line;
-            }
-        }
-        return null;
+        return ubications.stream()
+                .filter(line -> !line.startsWith("Código Departamento") && line.split(",")[2].equalsIgnoreCase(mCode))
+                .findFirst().orElse(null);
     }
 
+    // Lista única de departamentos ("code,name")
     public List<String> getStates() {
-        Set<String> states = new HashSet<>();
-        for (String line : ubications) {
-            if (line.startsWith("Código Departamento")) continue;
-            String[] parts = line.split(",");
-            if (parts.length > 1) {
-                states.add(parts[0] + "," + parts[1]);
-            }
-        }
-        return new ArrayList<>(states);
+        return ubications.stream()
+                .filter(line -> !line.startsWith("Código Departamento"))
+                .map(line -> {
+                    String[] parts = line.split(",");
+                    return parts[0] + "," + parts[1];
+                })
+                .distinct()
+                .collect(Collectors.toList());
     }
 
+    // Nombre de departamento por código
     public String getStateByCode(String code) {
-        for (String line : ubications) {
-            if (line.startsWith("Código Departamento")) continue;
-            String[] parts = line.split(",");
-            if (parts.length > 1 && parts[0].equalsIgnoreCase(code)) {
-                return parts[1];
-            }
-        }
-        return null;
+        return ubications.stream()
+                .filter(line -> !line.startsWith("Código Departamento") && line.split(",")[0].equalsIgnoreCase(code))
+                .map(line -> line.split(",")[1])
+                .findFirst().orElse(null);
     }
 
+    // Municipios capitales: código municipio termina en 001
     public List<String> getCapitals() {
-        List<String> result = new ArrayList<>();
-        for (String line : ubications) {
-            if (line.startsWith("Código Departamento")) continue;
-            String[] parts = line.split(",");
-            if (parts.length > 2 && parts[2].endsWith("001")) {
-                result.add(line);
-            }
-        }
-        return result;
+        return ubications.stream()
+                .filter(line -> {
+                    if (line.startsWith("Código Departamento")) return false;
+                    String[] parts = line.split(",");
+                    return parts[2].endsWith("001");
+                })
+                .collect(Collectors.toList());
     }
 }
